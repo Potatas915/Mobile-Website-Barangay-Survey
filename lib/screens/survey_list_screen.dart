@@ -89,12 +89,22 @@ class _State extends State<SurveyListScreen> {
             child: Col350(
               child: Column(children: [
                 const Gap(12),
-                Row(children: [
-                  const BackLink(label: '← Back', size: 15),
-                  Expanded(
-                      child: Text('Available Surveys',
-                          style: ts(20, bold: true))),
-                ]),
+                Stack(
+                  alignment:
+                      Alignment.center, // Centers everything inside the Stack
+                  children: [
+                    // 1. The Back Link anchored to the far left
+                    Center(
+                      child:
+                          Text('Available Surveys', style: ts(20, bold: true)),
+                    ),
+                    // 2. The centered title text
+                    const Align(
+                      alignment: Alignment.centerLeft,
+                      child: BackLink(label: '← Back', size: 15),
+                    ),
+                  ],
+                ),
                 const Gap(8),
                 Container(
                   width: double.infinity,
@@ -156,8 +166,7 @@ class _State extends State<SurveyListScreen> {
     return ListView.separated(
       physics: const AlwaysScrollableScrollPhysics(),
       itemCount: rows.length + 1, // header row + surveys
-      separatorBuilder: (_, __) =>
-          const Divider(height: 1, color: C.mint),
+      separatorBuilder: (_, __) => const Divider(height: 1, color: C.mint),
       itemBuilder: (_, i) {
         if (i == 0) return const _TableHeader();
         final s = rows[i - 1];
@@ -186,8 +195,7 @@ class _State extends State<SurveyListScreen> {
         physics: const AlwaysScrollableScrollPhysics(),
         children: [
           const Gap(40),
-          Text(text,
-              textAlign: TextAlign.center, style: ts(14, bold: true)),
+          Text(text, textAlign: TextAlign.center, style: ts(14, bold: true)),
         ],
       );
 }
@@ -222,21 +230,21 @@ class _StatusPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-      width: 92,
-      alignment: Alignment.center,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: completed ? C.mint : const Color(0xFFE7F1FF),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        completed ? 'Completed' : 'Open',
-        textAlign: TextAlign.center,
-        maxLines: 1,
-        softWrap: false,
-        style: ts(12,
-            bold: true,
-            color: completed ? C.deepGreen : const Color(0xFF1D5FD1)),
-      ),
-    );
+        width: 92,
+        alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: completed ? C.mint : const Color(0xFFE7F1FF),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          completed ? 'Completed' : 'Open',
+          textAlign: TextAlign.center,
+          maxLines: 1,
+          softWrap: false,
+          style: ts(12,
+              bold: true,
+              color: completed ? C.deepGreen : const Color(0xFF1D5FD1)),
+        ),
+      );
 }
