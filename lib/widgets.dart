@@ -198,16 +198,69 @@ class InfoRow extends StatelessWidget {
       );
 }
 
-class ActiveBadge extends StatelessWidget {
-  const ActiveBadge({super.key, required this.width});
-  final double width;
+/// Same as [InfoRow] but the height follows the content, so long values
+/// (address, employer address, full names) wrap instead of being clipped.
+class InfoRowFlexible extends StatelessWidget {
+  const InfoRowFlexible(
+      {super.key, required this.asset, required this.label, required this.value});
+  final String asset, label, value;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          SizedBox(
+              width: 50,
+              height: 25,
+              child: Image.asset(asset, fit: BoxFit.contain)),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label, style: ts(16, bold: true)),
+                const Gap(2),
+                Text(value, style: ts(14)),
+              ],
+            ),
+          ),
+        ]),
+      );
+}
+
+/// Section heading used by the full resident details view.
+class SectionTitle extends StatelessWidget {
+  const SectionTitle(this.label, {super.key});
+  final String label;
   @override
   Widget build(BuildContext context) => Container(
-        width: width,
-        color: C.green,
-        alignment: Alignment.center,
-        child: Text('Active', style: ts(20, bold: true, color: C.white)),
+        width: double.infinity,
+        color: C.mint,
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+        child: Text(label.toUpperCase(),
+            style: ts(13, bold: true, color: C.deepGreen)),
       );
+}
+
+class ActiveBadge extends StatelessWidget {
+  const ActiveBadge({super.key, required this.width, this.label});
+  final double width;
+
+  /// Shown when present (e.g. the resident's database status), otherwise
+  /// "Active" as before.
+  final String? label;
+  @override
+  Widget build(BuildContext context) {
+    final raw = label?.trim() ?? '';
+    final text = raw.isEmpty
+        ? 'Active'
+        : '${raw[0].toUpperCase()}${raw.substring(1)}';
+    return Container(
+      width: width,
+      color: C.green,
+      alignment: Alignment.center,
+      child: Text(text, style: ts(20, bold: true, color: C.white)),
+    );
+  }
 }
 
 class BackLink extends StatelessWidget {

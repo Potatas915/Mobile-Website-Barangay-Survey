@@ -47,6 +47,28 @@ class ResidentService {
         : const LoginResult(LoginStatus.wrongPassword);
   }
 
+  /// Advisory only: the number the next registrant would most likely get.
+  ///
+  /// Mirrors the counter logic in [register] but never writes, so it can never
+  /// reserve a number. Two people registering at the same moment may both see
+  /// this value and only one will actually get it. [register] skips any number
+  /// already present in residents/ or lookup/, so the real number assigned at
+  /// submit can differ from this preview.
+  Future<String?> peekNextNumber() async {
+    var next = asInt(await _db.get('counters/residents')) + 1;
+    while (await _db.get('residents/$next', shallow: true) != null) {
+      next++;
+    }
+    var number = _formatNumber(next);
+    while (await _db.get('lookup/resident_number/$number') != null) {
+      next++;
+      number = _formatNumber(next);
+    }
+    return number;
+  }
+
+  String _formatNumber(int n) => '2026-${n.toString().padLeft(4, '0')}';
+
   /// Creates residents/<n>, lookup/resident_number/<number> and bumps
   /// counters/residents in a single atomic write.
   Future<Session> register({
@@ -62,10 +84,10 @@ class ResidentService {
     while (await _db.get('residents/$next', shallow: true) != null) {
       next++;
     }
-    var number = '2026-${next.toString().padLeft(4, '0')}';
+    var number = _formatNumber(next);
     while (await _db.get('lookup/resident_number/$number') != null) {
       next++;
-      number = '2026-${next.toString().padLeft(4, '0')}';
+      number = _formatNumber(next);
     }
     final now = Fmt.dateTime(DateTime.now());
     await _db.patch('', {

@@ -24,6 +24,24 @@ class _State extends State<RegistrationScreen> {
   bool _busy = false;
   ResultData? _result;
   Session? _session;
+  String? _peeked;
+
+  @override
+  void initState() {
+    super.initState();
+    _peek();
+  }
+
+  /// Advisory preview of the resident number. It is a read-only guess and is
+  /// not reserved: [ResidentService.register] may assign a different number.
+  Future<void> _peek() async {
+    try {
+      final n = await _service.peekNextNumber();
+      if (mounted) setState(() => _peeked = n);
+    } catch (_) {
+      // the database is unreachable; the form still works without the hint
+    }
+  }
 
   @override
   void dispose() {
@@ -55,7 +73,7 @@ class _State extends State<RegistrationScreen> {
         address: _address.text.trim(),
         password: _password.text,
       );
-      _result = const ResultData(true, 'Registered Successfully');
+      _result = ResultData(true, 'Your resident number is\n${_session!.number}');
     } on DbException catch (e) {
       _result = ResultData(false, e.message);
     } finally {
@@ -80,6 +98,19 @@ class _State extends State<RegistrationScreen> {
               padding: const EdgeInsets.only(top: 45, bottom: 25),
               child: Col350(
                 child: Column(children: [
+                  if (_peeked != null) ...[
+                    Container(
+                      width: double.infinity,
+                      color: C.mint,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 8),
+                      child: Text(
+                        'Your resident number will be $_peeked',
+                        style: ts(14, bold: true, color: C.deepGreen),
+                      ),
+                    ),
+                    const Gap(25),
+                  ],
                   LabeledField(label: 'First Name', controller: _first),
                   LabeledField(label: 'Last Name', controller: _last),
                   LabeledField(
